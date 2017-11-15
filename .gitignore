@@ -1,0 +1,20 @@
+### Python ###
+*.pyc
+gaussian_EM.py
+Demo.py
+Demo2.py
+
+### Directories ###
+/pickles
+/graphs
+/notebooks
+/results
+
+### shell scripts ###
+*.sh
+
+### stuff ###
+
+.idea
+*~
+
