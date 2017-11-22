@@ -32,7 +32,7 @@ class expectation_maximization:
 
         for e in range(transactions.shape[1]):
             for i in range(targets.shape[1]):
-                theta_F[e, i] = (sum(transactions[:, e] * targets[:, i]) + alpha)/ float(sum(targets[:, i]) + alpha*len(transactions))
+                theta_F[e, i] = (sum(transactions[:, e] * targets[:, i]) + alpha)/ float(sum(targets[:, i]) + alpha*transactions.shape[1])
                 if sum(targets[:, i]) == 0.0:
                     theta_F[e, i] = 0.0
         return theta_T, theta_F
@@ -53,7 +53,7 @@ class expectation_maximization:
             t, llikelihood_new = self.expectation(f, I, [theta_T, theta_F])
             values.append(llikelihood_new)
 
-            theta_T, theta_F = self.maximization(t, f, alpha=0.00)
+            theta_T, theta_F = self.maximization(t, f, alpha=0.0001)
             if self.verbose != 0:
                 print "Run %d produced theta of:" % i
                 print theta_T
