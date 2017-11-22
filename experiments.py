@@ -44,7 +44,8 @@ def main():
     #evaluationMLE.evaluate(predictions_MLE, y_test)
 
     for rounds in range(100):
-        print 'round: ' + str(rounds)
+        if np.remainder(rounds, 10) == 0:
+            print 'round: ' + str(rounds)
 
         # print "n_samples: ", n_samples
         model.fit(x_train, y_train, n_clusters=FLAGS.n_clusters, epochs=20)

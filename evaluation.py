@@ -89,7 +89,8 @@ class evaluation:
         return pd.DataFrame(data=self.results, columns=self.columns)
 
     def get_average_scores(self):
-        return pd.DataFrame(data=[np.mean(self.results, axis=0)], columns=self.columns)
+        self.results.append(list(np.mean(self.results, axis=0)))
+        return pd.DataFrame(data=self.results, columns=self.columns)
 
 
 
