@@ -1,11 +1,11 @@
 from sklearn.ensemble import RandomForestClassifier
 from costcla.models import CostSensitiveDecisionTreeClassifier
 from costcla.metrics import savings_score
-from evaluation import evaluation
 import math
 import numpy as np
 import pandas as pd
-
+from sklearn.linear_model import LogisticRegression
+from costcla.models import CostSensitiveLogisticRegression
 
 
 def preprocess():
@@ -26,13 +26,36 @@ def preprocess():
 
     return f, t, ids, Amounts
 
+def evaluate(y_, y, costmatrix):
+
+    precision = lambda tp, fp: float(tp) / (tp + fp) if (tp + fp) > 0 else 0
+    recall = lambda tp, fn: float(tp) / (tp + fn) if (tp + fn) > 0 else 0
+    specificity = lambda tn, fp: float(tn) / (tn + fp) if (tn + fp) > 0 else 0
+    tp, tn, fp, fn = 0, 0, 0, 0
+
+    for prediction, label in zip(y_, y):
+
+        if label == 1 and prediction == 1:
+            tp += 1
+        elif label == 0 and  prediction == 0:
+            tn += 1
+        elif label == 1 and prediction == 0:
+            fn += 1
+        else:
+            fp += 1
+
+    r = recall(tp, fn)
+    p = precision(tp, fp)
+    s = specificity(tn, fp)
+
+    savings = savings_score(y, y_, costmatrix)
+
+    return r, p, s, savings
+
 
 X, Y, ids, Amounts = preprocess()
 ratio = int(math.ceil(.8 * len(X)))
 x_train, y_train, x_test, y_test = X[:ratio], Y[:ratio], X[ratio:], Y[ratio:]
-
-evaluation_csdt = evaluation(Amounts[ratio:])
-evaluation_rf = evaluation(Amounts[ratio:])
 
 # cost_mat [false positives, false negatives, true positives, true negatives]
 cost_mat = np.ones((X.shape[0], 4))
@@ -43,25 +66,31 @@ cost_mat[:, 3] *= 0
 
 cost_mat_train, cost_mat_test = cost_mat[:ratio], cost_mat[ratio:]
 
-rfc = RandomForestClassifier(random_state=0)
-y_pred_test_rf = rfc.fit(x_train, np.argmax(y_train, axis=1)).predict_proba(x_test)
+y_train, y_test, = np.argmax(y_train, axis=1), np.argmax(y_test, axis=1)
 
+print y_train.shape, y_test.shape
 
+#random forest
+rfc = RandomForestClassifier(random_state=0).fit(x_train, y_train)
+y_pred_test_rf = rfc.predict(x_test)
 
-f = CostSensitiveDecisionTreeClassifier()
-y_pred_test_csdt = f.fit(x_train, np.argmax(y_train, axis=1), cost_mat_train).predict_proba(x_test)
+print evaluate(y_pred_test_rf, y_test, cost_mat_test)
 
+#logistic regression
+lr = LogisticRegression(random_state=0).fit(x_train, y_train)
+y_pred_test_lr = lr.predict(x_test)
 
-print np.argmax(y_test, axis=1).shape, y_pred_test_rf.shape, y_pred_test_csdt .shape
+print evaluate(y_pred_test_lr, y_test, cost_mat_test)
 
-evaluation_csdt.evaluate(y_pred_test_csdt, y_test)
-evaluation_rf.evaluate(y_pred_test_rf, y_test)
+#cost-sensitive decision trees
+CSDT = CostSensitiveDecisionTreeClassifier().fit(x_train, y_train, cost_mat_train)
+y_pred_test_csdt = CSDT.predict(x_test)
 
-print evaluation_rf.get_results()
-print evaluation_csdt.get_results()
+print evaluate(y_pred_test_csdt, y_test, cost_mat_test)
 
-#Savings using CSDecisionTree
-print(savings_score(np.argmax(y_test, axis=1), f.predict(x_test), cost_mat_test))
+#cost-sensitive lr
+CSLR = CostSensitiveLogisticRegression()
+CSLR.fit(x_train, y_train, cost_mat_train)
+y_pred_test_cslr = CSLR.predict(x_test)
 
-#Savings using only RandomForest
-print(savings_score(np.argmax(y_test, axis=1), rfc.predict(x_test), cost_mat_test))
+print evaluate(y_pred_test_cslr, y_test, cost_mat_test)

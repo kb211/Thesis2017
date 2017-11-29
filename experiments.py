@@ -39,10 +39,11 @@ def main():
     evaluationEM = evaluation(Amounts[ratio:])
     evaluationEM2 = evaluation(Amounts[ratio:])
 
-    # print "MLE: "
-    #predictions_MLE = model.predict(x_test, y_test)
-    #evaluationMLE.evaluate(predictions_MLE, y_test)
-
+    print "MLE: "
+    model.x_given_f, model.p_f = model.mle(x_train, y_train)
+    predictions_MLE = model.predict(x_test, y_test)
+    evaluationMLE.evaluate(predictions_MLE, y_test)
+    '''
     for rounds in range(100):
         if np.remainder(rounds, 10) == 0:
             print 'round: ' + str(rounds)
@@ -57,11 +58,11 @@ def main():
         # print "EM + EM: "
         predictions_c1_c2 = model.predict_c1_c2(x_test, y_test)
         evaluationEM2.evaluate(predictions_c1_c2, y_test)
+    '''
 
-
-    #evaluationMLE.get_results().to_csv("results/" + "MLE_" + str(FLAGS.n_clusters), index=False)
-    evaluationEM.get_average_scores().to_csv("results/" + "EMandMLE_" + str(FLAGS.n_clusters), index=False)
-    evaluationEM2.get_average_scores().to_csv("results/" + "EMandEM_" + str(FLAGS.n_clusters), index=False)
+    evaluationMLE.get_results().to_csv("results/" + "MLE_" + str(FLAGS.n_clusters), index=False)
+    #evaluationEM.get_average_scores().to_csv("results/" + "EMandMLE_" + str(FLAGS.n_clusters), index=False)
+    #evaluationEM2.get_average_scores().to_csv("results/" + "EMandEM_" + str(FLAGS.n_clusters), index=False)
 
 
 
