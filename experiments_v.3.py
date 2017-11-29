@@ -1,4 +1,11 @@
 import numpy as np
+import expectation_maximization as em
+
+def one_hot(array):
+    out = np.zeros((array.shape[0], np.max(array)+1))
+    out[np.arange(array.shape[0]), array] = 1
+    return out
+
 
 def simulate(p_ids, p_f, c_given_id, p_c_f, x_given_c_f, n):
 
@@ -10,7 +17,12 @@ def simulate(p_ids, p_f, c_given_id, p_c_f, x_given_c_f, n):
 
     X = np.array((np.array([x_given_c_f[:, c, f] for f, c in zip(F, C)]) > np.random.random((n, x_given_c_f.shape[0]))) * 1.0)
 
-    return F, IDs, C, X
+    IDs = one_hot(IDs)
+    F = one_hot(F)
+    C = one_hot(C)
+
+    input = np.concatenate((np.concatenate((IDs,X), axis=1), F), axis=1)
+    return input, C
 
 
 
@@ -48,5 +60,15 @@ print p_c_f
 print "Assert that the conditional probability formulation is correct, by checking that for every f, c, the probabilities of x sum to 1."
 print np.sum(np.sum(x_given_c_f, axis=1), axis=1)
 
-F, IDs, C, X = simulate(p_ids, p_f, c_given_id, p_c_f, x_given_c_f, 10000)
+#input = IDs, X, F
+input, C = simulate(p_ids, p_f, c_given_id, p_c_f, x_given_c_f, 10000)
+
+C_hidden = one_hot(np.random.choice(3, 10000, p=(np.arange(3)+1.)/np.sum(np.arange(3)+1.)))
+
+expmax = em.expectation_maximization(1, 0)
+
+p_c_nonfraud, x_given_c_nonfraud, losses_nonfraud, initial_values_nonfraud = expmax.em_algorithm(C_hidden, input, 200)
+
+
+
 
