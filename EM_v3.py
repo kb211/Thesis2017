@@ -6,9 +6,9 @@ class expectation_maximization:
         self.verbose = verbose
         self.thresh = thresh
 
-    def expectation(self, transactions, I, thetas):
+    def expectation(self, transactions, thetas):
 
-        theta_T, theta_F = thetas[0], thetas[1]
+        theta_T, theta_F, c_given_id = thetas[0], thetas[1], thetas[2]
         y = np.asarray(np.zeros([transactions.shape[0], theta_F.shape[1]]))
 
         log_likelihood, ll = 0, []
@@ -24,26 +24,27 @@ class expectation_maximization:
 
         return y, log_likelihood
 
-    def maximization(self, targets, transactions, alpha=0.0):
+    def maximization(self, targets, transactions, ids, alpha=0.0):
 
-        theta_T = np.mean(targets, axis=0)
+        theta_IDs = np.mean(ids, axis=0)
 
-        theta_F = np.zeros([transactions.shape[1], targets.shape[1]])
+        theta_C = np.mean(targets, axis=0)
+        C_given_ID = np.dot(targets.T, ids)
 
-        for e in range(transactions.shape[1]):
-            for i in range(targets.shape[1]):
-                theta_F[e, i] = (sum(transactions[:, e] * targets[:, i]) + alpha)/ float(sum(targets[:, i]) + alpha*2)
-        # F_given_T = np.dot(targets.T,transactions) + alpha
-        # F_given_T /= (np.sum(F_given_T, axis=1)[:,None] + alpha*2)
-                if sum(targets[:, i]) == 0.0:
-                    theta_F[e, i] = 0.0
-        return theta_T, theta_F
+        C_given_ID /= np.sum(C_given_ID, axis=0)
 
-    def em_algorithm(self, t, f, iterations):
+        print C_given_ID
+        X_given_C = np.dot(targets.T,transactions) + alpha
+        X_given_C /= (np.sum(X_given_C, axis=1)[:,None] + alpha*2)
+
+
+        return theta_C, X_given_C.T, C_given_ID
+
+    def em_algorithm(self, t, f, ids, iterations):
         values = []
-        I = (f != -1) * 1
+        #I = (f != -1) * 1
 
-        theta_T, theta_F = self.maximization(t, f, alpha=0.000001)
+        theta_T, theta_F, c_given_id = self.maximization(t, f, ids, alpha=0.0001)
 
         init_theta_T, init_theta_F = theta_T, theta_F
 
@@ -52,10 +53,10 @@ class expectation_maximization:
 
         for i in range(iterations):
 
-            t, llikelihood_new = self.expectation(f, I, [theta_T, theta_F])
+            t, llikelihood_new = self.expectation(f, [theta_T, theta_F, c_given_id])
             values.append(llikelihood_new)
 
-            theta_T, theta_F = self.maximization(t, f, alpha=0.0001)
+            theta_T, theta_F, c_given_id = self.maximization(t, f, ids, alpha=0.000001)
             if self.verbose != 0:
                 print "Run %d produced theta of:" % i
                 print theta_T
@@ -64,7 +65,7 @@ class expectation_maximization:
                 return theta_T, theta_F, values, [init_theta_T, init_theta_F]
             llikelihood_old = llikelihood_new
 
-        return theta_T, theta_F, values, [init_theta_T, init_theta_F]
+        return theta_T, theta_F, theta_T, theta_F,
 
     def bernouli(self, theta, x):
         result = np.zeros(x.shape)
@@ -72,7 +73,3 @@ class expectation_maximization:
         for i in range(x.shape[1]):
             result[:, i] = np.where(x[:, i]==1, np.log(theta[i]), np.log(1-theta[i]))
         return result
-
-
-
-
