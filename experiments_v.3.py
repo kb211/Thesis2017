@@ -36,6 +36,29 @@ def mle(X, F, IDs, C):
 
     #print p_ids, p_f, c_given_id
 
+def predict(thetas):
+    x_given_c_f, c_given_id, p_id, p_f = thetas[0], thetas[1], thetas[2], thetas[3]
+
+    p_cf = np.array(p_c)[:, np.newaxis] * np.array(p_f)[:, np.newaxis].T
+
+    p_xfraud = lambda x: np.prod(x * x_given_f[:, 1] + np.abs(x - 1) * np.abs(x_given_f[:, 1] - 1))
+
+    p_xnonfraud = lambda x, c: np.prod(x * x_given_c[:, c] + np.abs(x - 1) * np.abs(x_given_c[:, c] - 1))
+
+    p_x_given_c_f = lambda x, c, f: (p_xfraud(x) if f == 1 else p_xnonfraud(x, c))
+
+    f_given_x = np.zeros((y_test.shape[0], 2))
+    for i, tx in enumerate(x_test):
+        joint = np.zeros((x_given_f.shape[1], x_given_c.shape[1]))
+        for c in np.arange(x_given_c.shape[1]):
+            for f in np.arange(x_given_f.shape[1]):
+                joint[f, c] += p_x_given_c_f(tx, c, f) * p_cf[c, f]
+
+        f_given_x[i, :] = (np.sum(joint, axis=1) / np.sum(joint))
+
+    return f_given_x
+
+
 p_ids = np.array([0.1, 0.2, 0.3, 0.2, 0.2])
 p_f = np.array([.7, .3])
 
@@ -80,18 +103,13 @@ expmax = em.expectation_maximization(1, 0)
 
 
 
-p_c_learned, x_given_c_learned, c_given_id_learned, p_ids_learned = expmax.em_algorithm(C_hidden, X, IDs, 3)
+p_c_learned, x_given_c_learned, c_given_id_learned = expmax.em_algorithm(C_hidden, X, IDs, 400)
 
 print p_c
 
-#x_given_c_f_learned = np.array([x_given_c_learned.T * f for f in p_f]).T
+x_given_c_f_learned = np.array([x_given_c_learned.T * f for f in p_f]).T
 
 #print x_given_c_f_learned.shape
-
-#C_leaned = expmax.expectation(X, [p_c_learned, x_given_c_learned])
-
-
-
 #print p_c
 #mle(X, F, IDs, C)
 

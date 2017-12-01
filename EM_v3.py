@@ -65,7 +65,7 @@ class expectation_maximization:
                 return theta_T, theta_F, values, [init_theta_T, init_theta_F]
             llikelihood_old = llikelihood_new
 
-        return theta_T, theta_F, theta_T, theta_F,
+        return theta_T, theta_F, c_given_id
 
     def bernouli(self, theta, x):
         result = np.zeros(x.shape)
