@@ -30,15 +30,33 @@ class expectation_maximization:
         intermediate = (np.log(x_given_c) * x[:, None, :]) + (np.log(1 - x_given_c) * (1- x[:, None, :]))
 
         p_x = np.log(p_c) + np.sum(intermediate, axis=2)
+
+        assert not np.isnan(p_x).any()
         y = np.exp(p_x) / np.sum(np.exp(p_x), axis=1, keepdims=True)
+
+        assert not np.isnan(y).any()
         return y
 
     def maximization(self, f, x, ids, c, alpha=0.0):
-        c_given_q = (ids[:, :, None]* c[:, None, :]).sum(axis=0) / ids.sum(axis=0)[:, None]
-        x_given_c_f = ((f[:, :, None]* c[:, None, :])[:,:,:,None]*x[:, None, None, :]).sum(axis=0) / (f[:, :, None]* c[:, None, :]).sum(axis=0)[:, :, None]
+        #c_given_q = (ids[:, :, None]* c[:, None, :]).sum(axis=0) / ids.sum(axis=0)[:, None]
+
+        x_given_c_f = ((f[:, :, None]* c[:, None, :])[:,:,:,None]*x[:, None, None, :] + alpha).sum(axis=0) / (f[:, :, None]* c[:, None, :] + (alpha*2)).sum(axis=0)[:, :, None]
 
 
-        return x_given_c_f.T, c_given_q.T
+
+        c_and_id = np.concatenate([c, ids[:, None]], axis=1)
+        sorted = c_and_id[c_and_id[:, -1].argsort()]
+        splitted = np.split(sorted, np.where(np.diff(sorted[:, c.shape[1]]))[0] + 1)
+        c_given_q2 = np.zeros((c.shape[1], np.max(ids)+1))
+
+        for split in splitted:
+            idx = int(split[0, -1])
+            c_given_q2[:, idx] = (np.sum(split, axis=0)[:-1] + alpha) / (split.shape[1] + (alpha*2))
+
+        assert not np.isnan(x_given_c_f.T).any()
+        assert not np.isnan(c_given_q2).any()
+        #print c_given_q.T
+        return x_given_c_f.T, c_given_q2
 
     def em_algorithm(self, f, x, ids, iterations, n=3):
         values = []
@@ -48,15 +66,16 @@ class expectation_maximization:
         c_given_q = self.normalize(np.random.rand(n, np.unique(ids).shape[0]), axis=0)
         p_q = self.normalize(np.bincount(ids))
         p_f = np.mean(f, axis=0)
-        ids_oh = self.one_hot(ids)
+        #ids_oh = self.one_hot(ids)
 
         for i in range(iterations):
-
+            #print "iteration: ", str(i)
             thetas = [x_given_c_f, c_given_q]
             c = self.expectation(f, x, ids, thetas)
 
-            x_given_c_f, c_given_q = self.maximization(f, x, ids_oh, c, alpha=0.000001)
+            x_given_c_f, c_given_q = self.maximization(f, x, ids, c, alpha=0.000001)
 
+        #print np.mean(c, axis=0)
         return x_given_c_f, c_given_q, p_q, p_f
 
     def bernouli(self, theta, x):
