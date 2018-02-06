@@ -11,7 +11,8 @@ In order to use the package a rpm package will be created (still under construct
 This library only runs on python 2.7 currently. A few packages have to be installed:
 
 ```
-Give examples
+numpy 1.8.2
+pandas 1.18.1
 ```
 
 ## Authors
