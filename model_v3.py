@@ -1,5 +1,6 @@
 import numpy as np
 import EM_v3 as em
+import matplotlib.pyplot as plt
 
 class bayesnet:
 
@@ -39,13 +40,14 @@ class bayesnet:
     def fit(self, x_train, y_train, ids, n_clusters=2, epochs=20, init='random', verbose = 0):
         expmax = em.expectation_maximization(verbose, 0)
 
-        self.x_given_c_f, self.c_given_q, self.p_q, self.p_f = expmax.em_algorithm(y_train, x_train, ids, epochs, n=n_clusters)
+        self.x_given_c_f, self.c_given_q, self.p_q, self.p_f, likelihoods = expmax.em_algorithm(y_train, x_train, ids, epochs, n=n_clusters)
 
         uniform = np.ones((self.c_given_q.shape[0], 1)) / np.sum(np.ones((self.c_given_q.shape[0], 1)))
 
         self.c_given_q = np.append(self.c_given_q, uniform, axis=1)
 
-        #print self.x_given_c_f, self.c_given_q, self.p_q, self.p_f
+        if verbose == 1:
+            self.visualize_likelihood(likelihoods)
 
     def bernouli(self, theta, x):
         result = np.zeros(x.shape)
@@ -102,6 +104,14 @@ class bayesnet:
         table_p_x_c_f_i = np.array([[[[ p_xi_c_f(x, c, f, i) for i in range(x_given_f.shape[0])] for x in range(Nx)] for c in all_possible_cs] for f in all_possible_fs])
 
         print table_p_x_c_f_i.sum(axis=0).sum(axis=0).sum(axis=0)
+
+    def visualize_likelihood(self, log_likelihood, color='b'):
+
+
+        plt.plot(log_likelihood, c=color)
+        plt.ylabel(r'$\ell ^ {(k)}$')
+        plt.xlabel(r'Iteration $k$')
+        plt.show()
 
 
 

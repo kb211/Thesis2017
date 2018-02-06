@@ -32,10 +32,11 @@ class expectation_maximization:
         p_x = np.log(p_c) + np.sum(intermediate, axis=2)
 
         assert not np.isnan(p_x).any()
+        likelihood = np.sum(np.exp(p_x))
         y = np.exp(p_x) / np.sum(np.exp(p_x), axis=1, keepdims=True)
 
         assert not np.isnan(y).any()
-        return y
+        return y, likelihood
 
     def maximization(self, f, x, ids, c, alpha=0.0):
         #c_given_q = (ids[:, :, None]* c[:, None, :]).sum(axis=0) / ids.sum(axis=0)[:, None]
@@ -59,7 +60,7 @@ class expectation_maximization:
         return x_given_c_f.T, c_given_q2
 
     def em_algorithm(self, f, x, ids, iterations, n=3):
-        values = []
+        likelihood_values = []
         #I = (f != -1) * 1
 
         x_given_c_f = self.normalize(np.random.rand(x.shape[1], n, f.shape[1]), axis=0)
@@ -68,15 +69,17 @@ class expectation_maximization:
         p_f = np.mean(f, axis=0)
         #ids_oh = self.one_hot(ids)
 
+        likelihood_old = -np.infty
         for i in range(iterations):
             #print "iteration: ", str(i)
             thetas = [x_given_c_f, c_given_q]
-            c = self.expectation(f, x, ids, thetas)
-
+            c, likelihood_new = self.expectation(f, x, ids, thetas)
+            likelihood_values.append(likelihood_new)
             x_given_c_f, c_given_q = self.maximization(f, x, ids, c, alpha=0.000001)
 
+        likelihood_old = likelihood_new
         #print np.mean(c, axis=0)
-        return x_given_c_f, c_given_q, p_q, p_f
+        return x_given_c_f, c_given_q, p_q, p_f, likelihood_values
 
     def bernouli(self, theta, x):
         result = np.zeros(x.shape)

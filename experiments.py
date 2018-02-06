@@ -4,7 +4,7 @@ from evaluation import evaluation
 import math
 import numpy as np
 import bayesian_network as bn
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import datetime
 
 VERBOSE = 0
@@ -38,29 +38,29 @@ def main():
     evaluationMLE = evaluation(Amounts[ratio:])
     evaluationEM = evaluation(Amounts[ratio:])
     evaluationEM2 = evaluation(Amounts[ratio:])
-
+    '''
     print "MLE: "
     model.x_given_f, model.p_f = model.mle(x_train, y_train)
     predictions_MLE = model.predict(x_test, y_test)
     evaluationMLE.evaluate(predictions_MLE, y_test)
     '''
-    for rounds in range(100):
-        if np.remainder(rounds, 10) == 0:
-            print 'round: ' + str(rounds)
+    for rounds in range(1):
+
+        print 'round: ' + str(rounds)
 
         # print "n_samples: ", n_samples
         model.fit(x_train, y_train, n_clusters=FLAGS.n_clusters, epochs=20)
 
         # print "MLE + EM: "
-        predictions_c1 = model.predict_with_c(x_test, y_test)
-        evaluationEM.evaluate(predictions_c1, y_test)
+        #predictions_c1 = model.predict_with_c(x_test, y_test)
+        #evaluationEM.evaluate(predictions_c1, y_test)
 
         # print "EM + EM: "
         predictions_c1_c2 = model.predict_c1_c2(x_test, y_test)
         evaluationEM2.evaluate(predictions_c1_c2, y_test)
-    '''
 
-    evaluationMLE.get_results().to_csv("results/" + "MLE_" + str(FLAGS.n_clusters), index=False)
+
+    #evaluationMLE.get_results().to_csv("results/" + "MLE_" + str(FLAGS.n_clusters), index=False)
     #evaluationEM.get_average_scores().to_csv("results/" + "EMandMLE_" + str(FLAGS.n_clusters), index=False)
     #evaluationEM2.get_average_scores().to_csv("results/" + "EMandEM_" + str(FLAGS.n_clusters), index=False)
 

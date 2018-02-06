@@ -4,8 +4,6 @@ from evaluation import evaluation
 import math
 import numpy as np
 import model_v3 as v3
-#import matplotlib.pyplot as plt
-import datetime
 from sklearn import preprocessing
 
 
@@ -55,12 +53,12 @@ def main():
     #print np.unique(ids_train).shape
     #print np.unique(ids_test).shape
 
-    for rounds in range(100):
+    for rounds in range(1):
 
         print 'round: ' + str(rounds)
 
         #print "n_samples: ", n_samples
-        model.fit(x_train, y_train, ids_train, n_clusters=FLAGS.n_clusters, epochs=20)
+        model.fit(x_train, y_train, ids_train, n_clusters=FLAGS.n_clusters, epochs=40, verbose=1)
 
         #print "MLE + EM: "
         predictions = model.predict(x_test, ids_test)
@@ -68,7 +66,7 @@ def main():
 
 
 
-    eval.get_results().to_csv("results/" + "v3_" + str(FLAGS.n_clusters), index=False)
+    #eval.get_results().to_csv("results/" + "v3_" + str(FLAGS.n_clusters), index=False)
 
 
 

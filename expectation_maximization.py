@@ -18,9 +18,9 @@ class expectation_maximization:
             ll.append(p_x_given_y)
             y[:, t_value] = np.log(theta_T[t_value]) + p_x_given_y
 
+        log_likelihood = np.sum(np.exp(y))
+
         y = np.exp(y)/np.sum(np.exp(y), axis=1, keepdims=True)
-        for i in range(len(ll)):
-            log_likelihood += np.dot(y[:, i], ll[i])
 
         return y, log_likelihood
 
@@ -30,14 +30,9 @@ class expectation_maximization:
 
         theta_F = np.zeros([transactions.shape[1], targets.shape[1]])
 
-        for e in range(transactions.shape[1]):
-            for i in range(targets.shape[1]):
-                theta_F[e, i] = (sum(transactions[:, e] * targets[:, i]) + alpha)/ float(sum(targets[:, i]) + alpha*2)
-        # F_given_T = np.dot(targets.T,transactions) + alpha
-        # F_given_T /= (np.sum(F_given_T, axis=1)[:,None] + alpha*2)
-                if sum(targets[:, i]) == 0.0:
-                    theta_F[e, i] = 0.0
-        return theta_T, theta_F
+        theta_F = (targets[:, :, None] * transactions[:, None, :]).sum(axis=0) / targets.sum(axis=0)[:, None]
+
+        return theta_T, theta_F.T
 
     def em_algorithm(self, t, f, iterations):
         values = []
@@ -47,7 +42,6 @@ class expectation_maximization:
 
         init_theta_T, init_theta_F = theta_T, theta_F
 
-        thresh = 0.0001
         llikelihood_old = -np.infty
 
         for i in range(iterations):
@@ -56,12 +50,10 @@ class expectation_maximization:
             values.append(llikelihood_new)
 
             theta_T, theta_F = self.maximization(t, f, alpha=0.0001)
-            if self.verbose != 0:
+            if self.verbose == 2:
                 print "Run %d produced theta of:" % i
                 print theta_T
 
-            if np.abs(llikelihood_new - llikelihood_old) < self.thresh and self.thresh !=0:
-                return theta_T, theta_F, values, [init_theta_T, init_theta_F]
             llikelihood_old = llikelihood_new
 
         return theta_T, theta_F, values, [init_theta_T, init_theta_F]
