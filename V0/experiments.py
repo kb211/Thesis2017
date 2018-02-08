@@ -3,7 +3,7 @@ import pandas as pd
 from evaluation import evaluation
 import math
 import numpy as np
-import v2 as bn
+import bayesian_network as bn
 #import matplotlib.pyplot as plt
 import datetime
 
@@ -77,3 +77,29 @@ if __name__ == '__main__':
     FLAGS, unparsed = parser.parse_known_args()
 
     main()
+
+'''
+
+    # p_c, x_given_c = fit(x_train_nonfraud[indexes], y_train_nonfraud[indexes], n_clusters=FLAGS.n_clusters, epochs=20, init='random')
+
+    # np.save('p_x_given_f(fraud)', p_x_given_f)
+    # np.save('p_f(fraud)', p_f)
+    # np.save('pickles/p_c(nonfraud)' + str(FLAGS.n_clusters), p_c)
+    # np.save('pickles/x_given_c(nonfraud)'+ str(FLAGS.n_clusters), x_given_c)
+
+    # x_given_f, p_f = np.load('pickles/p_x_given_f.npy'), np.load('pickles/p_f.npy')
+
+
+    for n_samples in [1051 * 16, 1051 * 32, math.ceil(x_train_nonfraud.shape[0]*0.5), x_train_nonfraud.shape[0]]:
+
+        p_c_nonfraud = np.load('pickles/p_c(nonfraud)' + str(FLAGS.n_clusters) + "_" + str(n_samples) + '.npy')
+        x_given_c_nonfraud = np.load(
+            'pickles/x_given_c(nonfraud)' + str(FLAGS.n_clusters) + "_" + str(n_samples) + '.npy')
+
+        p_c_fraud = np.load('pickles/p_c(fraud)' + str(FLAGS.n_clusters) + '.npy')
+        x_given_c_fraud = np.load('pickles/x_given_c(fraud)' + str(FLAGS.n_clusters) + '.npy')
+
+        indexes = np.random.choice(x_train_nonfraud.shape[0], n_samples)
+        x_train_undersample = np.concatenate((x_train_nonfraud[indexes], x_train_fraud), axis=0)
+        y_train_undersample = np.concatenate((y_train_nonfraud[indexes], y_train_fraud), axis=0)
+'''
