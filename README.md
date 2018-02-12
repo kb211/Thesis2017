@@ -11,8 +11,11 @@ In order to use the package a rpm package will be created (still under construct
 This library only runs on python 2.7 currently. A few packages have to be installed:
 
 ```
-numpy 1.8.2
+numpy 1.14.0
 pandas 1.18.1
+matplotlib 2.1.2
+costcla 0.5
+scipy 1.0.0
 ```
 
 ## Authors
