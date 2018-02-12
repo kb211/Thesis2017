@@ -129,7 +129,7 @@ class bayesnet:
 
         print table_p_x_c_f_i.sum(axis=0).sum(axis=0).sum(axis=0)
 
-    def visualize_likelihood(self, log_likelihood, color):
+    def visualize_likelihood(self, likelihood, color):
         """
 
         :param log_likelihood: List of likelihood values
@@ -137,7 +137,7 @@ class bayesnet:
         :output: graph
         """
 
-        plt.plot(log_likelihood, c=color)
+        plt.plot(likelihood, c=color)
         plt.ylabel(r'$\ell ^ {(k)}$')
         plt.xlabel(r'Iteration $k$')
         plt.show()

@@ -11,7 +11,9 @@ VERBOSE = 0
 THRESH = 0
 
 def preprocess():
-    dataset = pd.read_csv('../Data-for-Dimebox/tier1_with_ids.csv')
+    #dataset = pd.read_csv('../Data-for-Dimebox/tier1_with_ids.csv')
+
+    dataset = pd.read_csv('../../../datasets/Loan_payments_2.csv').sample(frac=1)
 
     t = np.ones((dataset['target'].shape[0], 2))
 
@@ -58,7 +60,7 @@ def main():
         print 'round: ' + str(rounds)
 
         #print "n_samples: ", n_samples
-        model.fit(x_train, y_train, ids_train, n_clusters=FLAGS.n_clusters, epochs=40, verbose=1)
+        model.fit(x_train, y_train, ids_train, k_clusters=FLAGS.k_clusters, epochs=40, verbose=1)
 
         #print "MLE + EM: "
         predictions = model.predict(x_test, ids_test)
@@ -66,7 +68,7 @@ def main():
 
 
 
-    #eval.get_results().to_csv("results/" + "v3_" + str(FLAGS.n_clusters), index=False)
+    #eval.get_results().to_csv("results/" + "v3_" + str(FLAGS.k_clusters), index=False)
 
 
 
@@ -76,7 +78,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--verbose', type=int, default=VERBOSE, help='0 for silent, 1 for system status, 2 for graphical mode')
     parser.add_argument('--thresh', type=int, default=THRESH, help='sets threshold for new log likelihood to make algorithm stop. 0 means no threshold')
-    parser.add_argument('--n_clusters', type=int, default=3, help='number of clusters')
+    parser.add_argument('--k_clusters', type=int, default=3, help='number of clusters')
 
     FLAGS, unparsed = parser.parse_known_args()
 
