@@ -41,7 +41,7 @@ def main():
 
     print "MLE: "
     model.x_given_f, model.p_f = model.mle(x_train, y_train)
-    predictions_v0 = model.predict(x_test, y_test)
+    predictions_v0 = model.predict(x_test)
     eval.evaluate(predictions_v0, y_test)
 
     eval.get_results().to_csv("../results/" + "v0", index=False)
