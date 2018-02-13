@@ -6,6 +6,11 @@ class bayesnet:
 
     def __init__(self, new_value_id):
 
+        """
+        Initializer.
+
+        """
+
         self.new_value_id = new_value_id
 
         self.p_f = np.array([])
@@ -45,9 +50,9 @@ class bayesnet:
         '''
         Predict y_hat for inputs X
 
-        :param x: Input parameters X
+        :param x: Input parameters (n x |X|)
         :param ids: Input ids
-        :return: p(F|X)
+        :return: Predictions p(F|X) (n x |F|)
         '''
 
         x_given_c_f, c_given_q, p_f = self.x_given_c_f, self.c_given_q, self.p_f
@@ -74,6 +79,8 @@ class bayesnet:
     def visualize_likelihood(self, likelihood, color='b'):
 
         '''
+        Visualize likelihood.
+
         :param likelihood: List of likelihood values
         :param color: Color of plot
         '''

@@ -6,6 +6,11 @@ class bayesnet:
 
     def __init__(self):
 
+        """
+        Initializer.
+
+        """
+
         self.x_given_f = np.array([])
         self.p_f = np.array([])
 
@@ -13,13 +18,15 @@ class bayesnet:
         self.losses_fraud = []
 
 
-    def fit(self, x_train, y_train, n_clusters=2, epochs=20, init='random', verbose = 0):
+    def fit(self, x_train, y_train):
+        """
+        Parameter Estimation
+
+        :param x_train: Training inputs (n x |X|)
+        :param y_train: Training Labels (n x |F|)
+        """
 
         self.x_given_f, self.p_f = self.mle(x_train, y_train, 0)
-
-        #if verbose == 1:
-        #    self.visualize_likelihood(losses_nonfraud, color='b')
-        #    self.visualize_likelihood(losses_fraud, color='r')
 
     def bernouli(self, theta, x):
         result = np.zeros(x.shape)
@@ -28,7 +35,15 @@ class bayesnet:
             result[:, i] = np.where(x[:, i] == 1, np.log(theta[i]), np.log(1 - theta[i]))
         return result
 
-    def predict(self, x_test, y_test):
+    def predict(self, x_test):
+
+        """
+        Predict y_hat for inputs X
+
+        :param x_test: Input parameters (n x |X|)
+        :return: Predictions p(F|X) (n x |F|)
+        """
+
         theta_F, theta_T = self.x_given_f, self.p_f
 
         y_ = np.zeros((x_test.shape[0], theta_F.shape[1]))
@@ -43,12 +58,14 @@ class bayesnet:
         return predictions
 
     def mle(self, features, targets, alpha=0.0001):
-        '''
-        :param features: Training inputs
-        :param targets: Training labels
-        :param alpha:
-        :return:
-        '''
+        """
+        Maximum likelihood estimation
+
+        :param features: Training inputs (n x |X|)
+        :param targets: Training labels (n x |F|)
+        :param alpha: Smoothing parameter for laplace smoothing
+        :return: X given F and probability of F p(X|F), p(F)
+        """
         # count positive examples and negative examples
         pos = features[targets[:, 1] == 1, :]
         pos_len = pos.shape[0]
@@ -58,14 +75,6 @@ class bayesnet:
 
         return np.asmatrix([((neg + alpha)/ (neg_len + alpha)), ((pos + alpha) / (pos_len + alpha))]).transpose(), [float(neg_len + alpha) / (pos_len + neg_len + alpha * features.shape[1]), float(pos_len + alpha) / (pos_len + neg_len + alpha * features.shape[1])]
 
-
-    def visualize_likelihood(self, log_likelihood, color):
-
-
-        plt.plot(log_likelihood, c=color)
-        plt.ylabel(r'$\ell ^ {(k)}$')
-        plt.xlabel(r'Iteration $k$')
-        plt.show()
 
 
 

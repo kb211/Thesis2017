@@ -58,10 +58,18 @@ class bayesnet:
 
         self.marginal_x_fraud = np.mean(x_train_fraud, axis=0)
 
-        if verbose >= 1:
+        if verbose == 1:
             self.visualize_likelihood(losses_nonfraud, color='b')
 
     def mle(self, features, targets, alpha=0.0001):
+        """
+        Maximum likelihood estimation
+
+        :param features: Training inputs (n x |X|)
+        :param targets: Training labels (n x |F|)
+        :param alpha: Smoothing parameter for laplace smoothing
+        :return: X given F and probability of F p(X|F), p(F)
+        """
 
         # count positive examples and negative examples
         pos = features[targets[:, 1] == 1, :]
@@ -75,9 +83,10 @@ class bayesnet:
 
     def predict(self, x_test):
         """
+        Predict y_hat for inputs X
 
-        :param x_test: Test inputs (n x |X|)
-        :return: Predictions (n x |F|)
+        :param x_test: Input parameters (n x |X|)
+        :return: Predictions p(F|X) (n x |F|)
         """
 
         p_c, x_given_c, x_given_f, p_f = self.p_c_nonfraud, self.x_given_c_nonfraud, self.marginal_x_fraud, np.array(self.p_f)
@@ -133,15 +142,16 @@ class bayesnet:
 
         print table_p_x_c_f_i.sum(axis=0).sum(axis=0).sum(axis=0)
 
-    def visualize_likelihood(self, log_likelihood, color):
-        """
+    def visualize_likelihood(self, likelihood, color='b'):
 
-        :param log_likelihood: List of likelihood values
+        '''
+        Visualize likelihood.
+
+        :param likelihood: List of likelihood values
         :param color: Color of plot
-        :output: graph
-        """
+        '''
 
-        plt.plot(log_likelihood, c=color)
+        plt.plot(likelihood, c=color)
         plt.ylabel(r'$\ell ^ {(k)}$')
         plt.xlabel(r'Iteration $k$')
         plt.show()
