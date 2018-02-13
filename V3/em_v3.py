@@ -21,10 +21,10 @@ class expectation_maximization:
         return arr / np.sum(arr, axis=axis, keepdims=True)
 
     def expectation(self, f, x, ids, thetas):
+
         x_given_c_f, c_given_q = thetas[0], thetas[1]
 
         p_c = c_given_q[:, ids].T
-
 
         x_given_c = x_given_c_f[:, :, np.argmax(f, axis=1)].T
         intermediate = (np.log(x_given_c) * x[:, None, :]) + (np.log(1 - x_given_c) * (1- x[:, None, :]))
@@ -61,10 +61,9 @@ class expectation_maximization:
 
     def em_algorithm(self, f, x, ids, iterations, n=3):
         likelihood_values = []
-        #I = (f != -1) * 1
 
         x_given_c_f = self.normalize(np.random.rand(x.shape[1], n, f.shape[1]), axis=0)
-        c_given_q = self.normalize(np.random.rand(n, np.unique(ids).shape[0]), axis=0)
+        c_given_q = self.normalize(np.random.rand(n, np.unique(ids).shape[0] + 1), axis=0)
         p_q = self.normalize(np.bincount(ids))
         p_f = np.mean(f, axis=0)
         #ids_oh = self.one_hot(ids)
@@ -73,6 +72,7 @@ class expectation_maximization:
         for i in range(iterations):
             #print "iteration: ", str(i)
             thetas = [x_given_c_f, c_given_q]
+
             c, likelihood_new = self.expectation(f, x, ids, thetas)
             likelihood_values.append(likelihood_new)
             x_given_c_f, c_given_q = self.maximization(f, x, ids, c, alpha=0.000001)

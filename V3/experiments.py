@@ -4,8 +4,6 @@ from evaluation import evaluation
 import math
 import numpy as np
 import v3
-from sklearn import preprocessing
-
 
 VERBOSE = 0
 THRESH = 0
@@ -38,18 +36,7 @@ def main():
     x_train, y_train, x_test, y_test = X[:ratio], Y[:ratio], X[ratio:], Y[ratio:]
     ids_train, ids_test = ids[:ratio], ids[ratio:]
 
-
-    le = preprocessing.LabelEncoder()
-    le.fit(np.append(ids_train, "new_value"))
-
-
-    ids_test = np.where(np.in1d(ids_test, ids_train), ids_test, "new_value")
-
-    ids_train = le.transform(ids_train)
-    ids_test = le.transform(ids_test)
-    new_value_id = le.transform(["new_value"])
-
-    model = v3.bayesnet(new_value_id)
+    model = v3.bayesnet()
     eval = evaluation(Amounts[ratio:])
 
     #print np.unique(ids_train).shape
@@ -68,7 +55,7 @@ def main():
 
 
 
-    #eval.get_results().to_csv("results/" + "v3_" + str(FLAGS.k_clusters), index=False)
+    eval.get_results().to_csv("../results/" + "v3_" + str(FLAGS.k_clusters), index=False)
 
 
 

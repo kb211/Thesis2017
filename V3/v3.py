@@ -1,17 +1,16 @@
 import numpy as np
 import em_v3 as em
 import matplotlib.pyplot as plt
+from id_encoder import IDEncoder
 
 class bayesnet:
 
-    def __init__(self, new_value_id):
+    def __init__(self):
 
         """
         Initializer.
 
         """
-
-        self.new_value_id = new_value_id
 
         self.p_f = np.array([])
         self.p_q = np.array([])
@@ -34,13 +33,18 @@ class bayesnet:
         :param verbose: 1 for likelihood plots, 2 for print of parameters at each iterations
         """
 
+        self.Encoder = IDEncoder()
+        self.Encoder.fit(ids)
+
+        ids = self.Encoder.transform(ids)
+
         expmax = em.expectation_maximization(verbose, 0)
 
         self.x_given_c_f, self.c_given_q, self.p_q, self.p_f, self.likelihoods = expmax.em_algorithm(y_train, x_train, ids, epochs, n=k_clusters)
 
-        uniform = np.ones((self.c_given_q.shape[0], 1)) / np.sum(np.ones((self.c_given_q.shape[0], 1)))
+        uniform = np.ones((self.c_given_q.shape[0])) / np.sum(np.ones((self.c_given_q.shape[0])))
 
-        self.c_given_q = np.append(self.c_given_q, uniform, axis=1)
+        self.c_given_q[:, self.Encoder.new_value] = uniform
 
         if verbose == 1:
             self.visualize_likelihood(self.likelihoods)
@@ -54,6 +58,9 @@ class bayesnet:
         :param ids: Input ids
         :return: Predictions p(F|X) (n x |F|)
         '''
+
+        #ids_test = np.where(np.in1d(self.known_ids, ids), ids, "new_value")
+        ids = self.Encoder.transform(ids)
 
         x_given_c_f, c_given_q, p_f = self.x_given_c_f, self.c_given_q, self.p_f
 
@@ -71,7 +78,7 @@ class bayesnet:
             for c in np.arange(x_given_c_f.shape[1]):
                 for f in np.arange(x_given_c_f.shape[2]):
                     joint[c, f] += p_x_given_c_f(tx, c, f) * p_c_f(ID)[c, f]
-
+            
             f_given_x[i, :] = (np.sum(joint, axis=0) / np.sum(joint))
 
         return f_given_x
