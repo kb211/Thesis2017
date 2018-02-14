@@ -33,6 +33,9 @@ class bayesnet:
         :param verbose: 1 for likelihood plots, 2 for print of parameters at each iterations
         """
 
+        assert not np.isnan(x_train).any(), 'Input array contains nan'
+        assert not np.isnan(y_train).any, 'Input array contains nan'
+
         self.Encoder = IDEncoder()
         self.Encoder.fit(ids)
 
@@ -44,7 +47,7 @@ class bayesnet:
 
         uniform = np.ones((self.c_given_q.shape[0])) / np.sum(np.ones((self.c_given_q.shape[0])))
 
-        self.c_given_q[:, self.Encoder.new_value] = uniform
+        self.c_given_q = np.insert(self.c_given_q, self.Encoder.new_value, uniform, axis=1)
 
         if verbose == 1:
             self.visualize_likelihood(self.likelihoods)
@@ -59,7 +62,8 @@ class bayesnet:
         :return: Predictions p(F|X) (n x |F|)
         '''
 
-        #ids_test = np.where(np.in1d(self.known_ids, ids), ids, "new_value")
+        
+
         ids = self.Encoder.transform(ids)
 
         x_given_c_f, c_given_q, p_f = self.x_given_c_f, self.c_given_q, self.p_f
@@ -78,7 +82,7 @@ class bayesnet:
             for c in np.arange(x_given_c_f.shape[1]):
                 for f in np.arange(x_given_c_f.shape[2]):
                     joint[c, f] += p_x_given_c_f(tx, c, f) * p_c_f(ID)[c, f]
-            
+
             f_given_x[i, :] = (np.sum(joint, axis=0) / np.sum(joint))
 
         return f_given_x
