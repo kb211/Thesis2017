@@ -33,8 +33,9 @@ class bayesnet:
         :param verbose: 1 for likelihood plots, 2 for print of parameters at each iterations
         """
 
-        assert not np.isnan(x_train).any(), 'Input array contains nan'
-        assert not np.isnan(y_train).any, 'Input array contains nan'
+        assert not np.isnan(x_train).any(), 'Input array x_train contains nan'
+        assert not np.isnan(y_train).any(), 'Input array y_train contains nan'
+        assert x_train.min() >= 0 and x_train.max() <= 1, 'Input x_train cointains unnormalized values'
 
         self.Encoder = IDEncoder()
         self.Encoder.fit(ids)
@@ -62,7 +63,9 @@ class bayesnet:
         :return: Predictions p(F|X) (n x |F|)
         '''
 
-        
+        assert not np.isnan(x).any(), 'Input array x contains nan'
+        assert x.shape[1] == self.x_given_c_f.shape[0], 'Input array is of shape ' + str(x.shape[1]) + 'when shape (n, ' + str(self.x_given_c_f.shape[0]) + ') was expected.'
+        assert x.min() >= 0 and x.max() <= 1, 'Input x_train cointains unnormalized values'
 
         ids = self.Encoder.transform(ids)
 
