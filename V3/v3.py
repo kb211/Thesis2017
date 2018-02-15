@@ -37,6 +37,8 @@ class bayesnet:
         assert not np.isnan(y_train).any(), 'Input array y_train contains nan'
         assert x_train.min() >= 0 and x_train.max() <= 1, 'Input x_train cointains unnormalized values'
 
+        y_train = self.label_transform(y_train)
+
         self.Encoder = IDEncoder()
         self.Encoder.fit(ids)
 
@@ -104,6 +106,11 @@ class bayesnet:
         plt.xlabel(r'Iteration $k$')
         plt.show()
 
-
+    def label_transform(self, y):
+        if y.ndim == 1:
+            b = np.zeros((len(y), y.max()+1))
+            b[np.arange(len(y)), y] = 1
+            return b
+        return y
 
 

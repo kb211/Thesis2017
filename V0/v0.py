@@ -29,6 +29,8 @@ class bayesnet:
         assert not np.isnan(y_train).any(), 'Input array y_train contains nan'
         assert x_train.min() >= 0 and x_train.max() <= 1, 'Input x_train cointains unnormalized values'
 
+        y_train = self.label_transform(y_train)
+
         self.x_given_f, self.p_f = self.mle(x_train, y_train, 0)
 
     def bernouli(self, theta, x):
@@ -47,7 +49,7 @@ class bayesnet:
         :return: Predictions p(F|X) (n x |F|)
         """
         assert not np.isnan(x_test).any(), 'Input array x contains nan'
-        assert x_test.shape[1] == self.x_given_c_f.shape[0], 'Input array is of shape ' + str(x_test.shape[1]) + 'when shape (n, ' + str(self.x_given_c_f.shape[0]) + ') was expected.'
+        assert x_test.shape[1] == self.x_given_f.shape[0], 'Input array is of shape ' + str(x_test.shape[1]) + 'when shape (n, ' + str(self.x_given_c_f.shape[0]) + ') was expected.'
         assert x_test.min() >= 0 and x_test.max() <= 1, 'Input x_train cointains unnormalized values'
 
         theta_F, theta_T = self.x_given_f, self.p_f
@@ -80,6 +82,13 @@ class bayesnet:
         neg = sum(features[targets[:, 0] == 1, :])
 
         return np.asmatrix([((neg + alpha)/ (neg_len + alpha)), ((pos + alpha) / (pos_len + alpha))]).transpose(), [float(neg_len + alpha) / (pos_len + neg_len + alpha * features.shape[1]), float(pos_len + alpha) / (pos_len + neg_len + alpha * features.shape[1])]
+
+    def label_transform(self, y):
+        if y.ndim == 1:
+            b = np.zeros((len(y), y.max()+1))
+            b[np.arange(len(y)), y] = 1
+            return b
+        return y
 
 
 

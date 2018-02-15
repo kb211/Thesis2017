@@ -37,6 +37,8 @@ class bayesnet:
         assert not np.isnan(y_train).any(), 'Input array y_train contains nan'
         assert x_train.min() >= 0 and x_train.max() <= 1, 'Input x_train cointains unnormalized values'
 
+        y_train = self.label_transform(y_train)
+
         expmax = em.expectation_maximization(verbose, 0)
 
         x_train_fraud = x_train[np.argmax(y_train, axis=1) == 1, :]
@@ -92,7 +94,7 @@ class bayesnet:
         :return: Predictions p(F|X) (n x |F|)
         """
         assert not np.isnan(x_test).any(), 'Input array x contains nan'
-        assert x_test.shape[1] == self.x_given_c_f.shape[0], 'Input array is of shape ' + str(x_test.shape[1]) + 'when shape (n, ' + str(self.x_given_c_f.shape[0]) + ') was expected.'
+        assert x_test.shape[1] == self.x_given_f.shape[0], 'Input array is of shape ' + str(x_test.shape[1]) + 'when shape (n, ' + str(self.x_given_c_f.shape[0]) + ') was expected.'
         assert x_test.min() >= 0 and x_test.max() <= 1, 'Input x_train cointains unnormalized values'
 
         p_c, x_given_c, x_given_f, p_f = self.p_c_nonfraud, self.x_given_c_nonfraud, self.marginal_x_fraud, np.array(self.p_f)
@@ -162,7 +164,12 @@ class bayesnet:
         plt.xlabel(r'Iteration $k$')
         plt.show()
 
-
+    def label_transform(self, y):
+        if y.ndim == 1:
+            b = np.zeros((len(y), y.max()+1))
+            b[np.arange(len(y)), y] = 1
+            return b
+        return y
 
 
 
