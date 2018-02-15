@@ -37,7 +37,10 @@ class bayesnet:
         :param init: Initiaization of parameters
         :param verbose: 1 for likelihood plots, 2 for print of parameters at each iterations
         """
-        
+        assert not np.isnan(x_train).any(), 'Input array x_train contains nan'
+        assert not np.isnan(y_train).any(), 'Input array y_train contains nan'
+        assert x_train.min() >= 0 and x_train.max() <= 1, 'Input x_train cointains unnormalized values'
+
         expmax = em.expectation_maximization(verbose, 0)
 
         x_train_fraud = x_train[np.argmax(y_train, axis=1) == 1, :]
@@ -94,7 +97,9 @@ class bayesnet:
         :param x_test: Input parameters (n x |X|)
         :return: Predictions p(F|X) (n x |F|)
         """
-
+        assert not np.isnan(x_test).any(), 'Input array x contains nan'
+        assert x_test.shape[1] == self.x_given_c_f.shape[0], 'Input array is of shape ' + str(x_test.shape[1]) + 'when shape (n, ' + str(self.x_given_c_f.shape[0]) + ') was expected.'
+        assert x_test.min() >= 0 and x_test.max() <= 1, 'Input x_train cointains unnormalized values'
 
         p_c1, x_given_c1, p_c2, x_given_c2, x_given_f, p_f = self.p_c_nonfraud, self.x_given_c_nonfraud, self.p_c_fraud, self.x_given_c_fraud, self.x_given_f, np.array(self.p_f)
 

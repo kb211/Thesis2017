@@ -25,6 +25,9 @@ class bayesnet:
         :param x_train: Training inputs (n x |X|)
         :param y_train: Training Labels (n x |F|)
         """
+        assert not np.isnan(x_train).any(), 'Input array x_train contains nan'
+        assert not np.isnan(y_train).any(), 'Input array y_train contains nan'
+        assert x_train.min() >= 0 and x_train.max() <= 1, 'Input x_train cointains unnormalized values'
 
         self.x_given_f, self.p_f = self.mle(x_train, y_train, 0)
 
@@ -43,6 +46,9 @@ class bayesnet:
         :param x_test: Input parameters (n x |X|)
         :return: Predictions p(F|X) (n x |F|)
         """
+        assert not np.isnan(x_test).any(), 'Input array x contains nan'
+        assert x_test.shape[1] == self.x_given_c_f.shape[0], 'Input array is of shape ' + str(x_test.shape[1]) + 'when shape (n, ' + str(self.x_given_c_f.shape[0]) + ') was expected.'
+        assert x_test.min() >= 0 and x_test.max() <= 1, 'Input x_train cointains unnormalized values'
 
         theta_F, theta_T = self.x_given_f, self.p_f
 
