@@ -86,7 +86,7 @@ class bayesnet:
         return np.asmatrix([((neg + alpha)/ (neg_len + alpha)), ((pos + alpha) / (pos_len + alpha))]).transpose(), [float(neg_len + alpha) / (pos_len + neg_len + alpha * features.shape[1]), float(pos_len + alpha) / (pos_len + neg_len + alpha * features.shape[1])]
 
 
-    def predict(self, x_test):
+    def predict_proba(self, x_test):
         """
         Predict y_hat for inputs X
 
@@ -171,6 +171,22 @@ class bayesnet:
             return b
         return y
 
+    def predict(self, x, amounts=None, scale=.22):
+        """
+        :param x: Input parameters (n x |X|)
+        :param amounts: Unnormalized transaction amounts n
+        :return: Predictions
+        """
+        y_ = self.predict_proba(x)
 
+        if amounts != None:
+            amounts = np.array(amounts)
+            assert amounts.shape[0] == x.shape[0], 'shape of transaction amounts does not match shape of x'
+
+            thresholds = scale / amounts
+
+            return np.where(y_ >= thresholds, 1., 0.)
+
+        return np.argmax(y_, axis=1)
 
 

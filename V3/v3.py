@@ -55,7 +55,7 @@ class bayesnet:
         if verbose == 1:
             self.visualize_likelihood(self.likelihoods)
 
-    def predict(self, x, ids):
+    def predict_proba(self, x, ids):
 
         '''
         Predict y_hat for inputs X
@@ -113,4 +113,20 @@ class bayesnet:
             return b
         return y
 
+    def predict(self, x, amounts=None, scale=.22):
+        """
+        :param x: Input parameters (n x |X|)
+        :param amounts: Unnormalized transaction amounts n
+        :return: Predictions
+        """
+        y_ = self.predict_proba(x)
 
+        if amounts != None:
+            amounts = np.array(amounts)
+            assert amounts.shape[0] == x.shape[0], 'shape of transaction amounts does not match shape of x'
+
+            thresholds = scale / amounts
+
+            return np.where(y_ >= thresholds, 1., 0.)
+
+        return np.argmax(y_, axis=1)
