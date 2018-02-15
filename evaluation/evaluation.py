@@ -26,6 +26,8 @@ class evaluation:
         return cmatrix
 
     def evaluate(self, y_, y):
+        y_ = self.label_transform(y_)
+        y = self.label_transform(y)
 
         tp, tn, fp, fn = 0, 0, 0, 0
 
@@ -92,5 +94,11 @@ class evaluation:
         self.results.append(list(np.mean(self.results, axis=0)))
         return pd.DataFrame(data=self.results, columns=self.columns)
 
+    def label_transform(self, y):
+        if y.ndim == 1:
+            b = np.zeros((len(y), y.max()+1))
+            b[np.arange(len(y)), y] = 1
+            return b
+        return y
 
 
