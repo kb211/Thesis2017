@@ -130,3 +130,6 @@ class bayesnet:
             return np.where(y_ >= thresholds, 1., 0.)
 
         return np.argmax(y_, axis=1)
+
+    def predict_log_proba(self, x, ids):
+        return np.log(self.predict_proba(x, ids))

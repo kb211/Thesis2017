@@ -189,4 +189,5 @@ class bayesnet:
 
         return np.argmax(y_, axis=1)
 
-
+    def predict_log_proba(self, x):
+        return np.log(self.predict_proba(x))
